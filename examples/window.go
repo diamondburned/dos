@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -36,6 +37,9 @@ func main() {
 		Style: defaultStyle,
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var app dos.App
 	app = dos.App{
 		ClearStyle: defaultStyle,
@@ -46,13 +50,14 @@ func main() {
 		},
 		OnKeyEvent: func(ev *tcell.EventKey) bool {
 			if ev.Key() == tcell.KeyEsc {
-				app.Running = false
+				cancel()
 				return true
 			}
 			return false
 		},
 	}
-	app.Run(screen)
+
+	app.Run(ctx, screen)
 }
 
 func MakeDialog(title string, rect dos.Rect, child dos.Widget) dos.Widget {
